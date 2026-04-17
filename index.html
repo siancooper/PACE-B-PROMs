@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PACE-B Trial: What do the results mean for patients?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f9fc; color: #222; }
+  header { background: #1a3a5c; color: white; padding: 2rem 1.5rem; text-align: center; }
+  header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  header p { font-size: 1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+  .intro { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+  .intro p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1rem; }
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem; }
+  .legend-box { width: 18px; height: 18px; border-radius: 3px; }
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+  .chart-card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 1.5rem; }
+  .chart-card h2 { font-size: 1.1rem; color: #1a3a5c; margin-bottom: 0.3rem; }
+  .chart-card .timepoint { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+  .waffle-wrap { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
+  .waffle-block { text-align: center; }
+  .waffle-block p { font-size: 0.8rem; color: #555; margin-top: 0.4rem; font-weight: 600; }
+  .stat-row { margin-top: 1rem; font-size: 0.9rem; color: #444; }
+  .stat-row span { font-weight: 700; color: #1a3a5c; }
+  footer { background: #1a3a5c; color: #ccc; text-align: center; padding: 1.5rem; font-size: 0.85rem; }
+  footer a { color: #7eb8e8; }
+  @media(max-width:500px){ header h1{font-size:1.3rem;} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PACE-B Trial: Patient-Reported Outcomes</h1>
+  <p>What do the quality-of-life results mean for patients choosing between stereotactic radiotherapy (SBRT) and conventional radiotherapy for prostate cancer?</p>
+</header>
+
+<div class="intro">
+  <p>The <strong>PACE-B trial</strong> compared two types of radiotherapy for localised prostate cancer: <strong>SBRT</strong> (5 treatments over 1&ndash;2 weeks) versus <strong>conventional radiotherapy</strong> (20 or 39 treatments over 4&ndash;8 weeks). These charts show what happened to patients&rsquo; quality of life &mdash; specifically their urinary, bowel and sexual function &mdash; at 2 years after treatment.</p>
+  <p>Each square in the waffle chart represents <strong>1 in 100 patients</strong>. Coloured squares show how many patients reported that symptom.</p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#2e86de"></div> SBRT (5 treatments)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#e84393"></div> Conventional RT</div>
+    <div class="legend-item"><div class="legend-box" style="background:#e8e8e8"></div> No symptom reported</div>
+  </div>
+</div>
+
+<div class="charts-grid" id="chartsGrid"></div>
+
+<footer>
+  <p>Based on patient-reported outcome data from the PACE-B randomised trial &bull; Published in <em>The Lancet Oncology</em> &bull; <a href="https://doi.org/10.1016/S1470-2045(24)00017-4" target="_blank">View publication</a></p>
+  <p style="margin-top:0.5rem">This page is for patient information only. Please discuss your treatment options with your clinical team.</p>
+</footer>
+
+<script>
+const data = [
+  {
+    title: "Urinary Incontinence",
+    timepoint: "2 years after treatment",
+    sbrt: 12,
+    crt: 10,
+    description: "patients in 100 reported urinary leakage"
+  },
+  {
+    title: "Urinary Obstruction / Irritation",
+    timepoint: "2 years after treatment",
+    sbrt: 18,
+    crt: 15,
+    description: "patients in 100 reported urinary obstruction or irritation symptoms"
+  },
+  {
+    title: "Bowel Symptoms",
+    timepoint: "2 years after treatment",
+    sbrt: 11,
+    crt: 14,
+    description: "patients in 100 reported significant bowel symptoms"
+  },
+  {
+    title: "Sexual Function",
+    timepoint: "2 years after treatment",
+    sbrt: 54,
+    crt: 58,
+    description: "patients in 100 reported poor or very poor sexual function"
+  },
+  {
+    title: "Hormonal / Vitality Symptoms",
+    timepoint: "2 years after treatment",
+    sbrt: 16,
+    crt: 18,
+    description: "patients in 100 reported hormonal or vitality symptoms"
+  },
+  {
+    title: "Overall Quality of Life",
+    timepoint: "2 years after treatment",
+    sbrt: 8,
+    crt: 9,
+    description: "patients in 100 reported a meaningful decline in overall quality of life"
+  }
+];
+
+function makeWaffle(pct, color, size) {
+  const cols = 10, rows = 10;
+  const cell = size / cols;
+  const gap = 1;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  let count = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('x', c * cell + gap/2);
+      rect.setAttribute('y', r * cell + gap/2);
+      rect.setAttribute('width', cell - gap);
+      rect.setAttribute('height', cell - gap);
+      rect.setAttribute('rx', 2);
+      rect.setAttribute('fill', count < pct ? color : '#e8e8e8');
+      svg.appendChild(rect);
+      count++;
+    }
+  }
+  return svg;
+}
+
+const grid = document.getElementById('chartsGrid');
+data.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'chart-card';
+  card.innerHTML = `<h2>${d.title}</h2><div class="timepoint">${d.timepoint}</div>
+    <div class="waffle-wrap">
+      <div class="waffle-block" id="w-sbrt-${d.title.replace(/\s/g,'')}"><p>SBRT: ${d.sbrt}%</p></div>
+      <div class="waffle-block" id="w-crt-${d.title.replace(/\s/g,'')}"><p>Conventional RT: ${d.crt}%</p></div>
+    </div>
+    <div class="stat-row"><span>${d.sbrt}</span> vs <span>${d.crt}</span> ${d.description}</div>`;
+  grid.appendChild(card);
+  const sbrtDiv = card.querySelector(`#w-sbrt-${d.title.replace(/\s/g,'')}`);
+  sbrtDiv.insertBefore(makeWaffle(d.sbrt, '#2e86de', 130), sbrtDiv.querySelector('p'));
+  const crtDiv = card.querySelector(`#w-crt-${d.title.replace(/\s/g,'')}`);
+  crtDiv.insertBefore(makeWaffle(d.crt, '#e84393', 130), crtDiv.querySelector('p'));
+});
+</script>
+</body>
+</html>
